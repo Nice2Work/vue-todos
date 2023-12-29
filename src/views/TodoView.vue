@@ -1,34 +1,34 @@
 <script setup>
-import { ref } from "vue";
 import { uid } from "uid";
-
-import TodoCreator from "@/components/TodoCreator.vue";
+import { ref } from "vue";
+import TodoCreator from "../components/TodoCreator.vue";
+import TodoItem from "../components/TodoItem.vue";
+import { Icon } from "@iconify/vue";
 
 const todoList = ref([]);
-
 const createTodo = (todo) => {
-  // This is perfectly fine, but the sample course asking to use the {uid} from the 'vue' package
-  // todoList.value.push({
-  //   id: todoList.value.length + 1,
-  //   title: todo,
-  //   completed: false,
-  // });
-
   todoList.value.push({
-    id: uid(), // this UID is really cool, it generates a unique ID for each todo
-    todo, // interesting enough, title and value can have this shortcut
-    isCompleted: null,
+    id: uid(),
+    todo,
+    isCompleted: false,
     isEditing: null,
   });
-  console.log(todoList.value);
 };
 </script>
 
 <template>
   <main>
-    <h1>Create ToDo</h1>
-    <!-- We are adding the function above to this component -->
-    <TodoCreator @create-todo="createTodo()" />
+    <h1>Create Todo</h1>
+    <TodoCreator @create-todo="createTodo" />
+    <ul class="todo-list" v-if="todoList.length > 0">
+      <!-- It is sending the whole object in the binding :todo="todo" 
+      it might be a good idea to give things different names as this is getting confusing!!-->
+      <TodoItem v-for="todo in todoList" :todo="todo" />
+    </ul>
+    <p class="todos-msg" v-else>
+      <Icon icon="noto-v1:sad-but-relieved-face" color="#41b080" width="42" />
+      <span>There are no todos!</span>
+    </p>
   </main>
 </template>
 
@@ -45,6 +45,21 @@ main {
     margin-bottom: 16px;
     text-align: center;
   }
+
+  .todo-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin-top: 24px;
+    gap: 20px;
+  }
+
+  .todos-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
 }
 </style>
-```

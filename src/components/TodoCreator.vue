@@ -1,52 +1,38 @@
 <script setup>
-// this below is NOT reactive and will not change when changing the input field
-// const todo = "testing";
+import { reactive } from "vue";
+import TodoButton from "./TodoButton.vue";
 
-// this below is reactive and will change when changing the input field
-import { ref, defineEmits, reactive } from "vue";
+const emit = defineEmits(["create-todo"]);
 
-// ********* This below works fine, but we are using the 'reactive method' below *********
-// const todo = ref("");
-
-const emit = defineEmits(["create-todo"]); // not sure why??
-
-// console.log(todo.value);
-
-const createTodo = () => {
-  console.log(todoState.todo);
-  emit("create-todo", todoState.todo); // each time we click it will EMIT the value of the input field
-};
-
-// here we use an object unlike in todoView we have an array
 const todoState = reactive({
   todo: "",
   invalid: false,
   errMsg: "",
 });
 
-console.log(todoState.todo);
+const createTodo = () => {
+  todoState.invalid = false;
+  if (todoState.todo !== "") {
+    emit("create-todo", todoState.todo);
+    todoState.todo = "";
+    return;
+  }
+  todoState.invalid = true;
+  todoState.errMsg = "Todo value cannot be empty!";
+};
 </script>
 
 <template>
-  <div class="input-wrap">
-    <!-- Here we have a regular reactive method -->
-    <!-- <input
-      type="text"
-      placeholder="Enter a new todo"
-      v-model="todo"
-      @keyup.enter="addTodo"
-    /> -->
-    <!-- Here we have a reactive method with the .value property -->
-    <input
-      type="text"
-      placeholder="Enter a new todo"
-      v-model="todoState.todo"
-    />
-
-    <button @click="createTodo" value="create">Create</button>
+  <div class="input-wrap" :class="{ 'input-err': todoState.invalid }">
+    <input type="text" v-model="todoState.todo" />
+    <!-- This is using a slot, when putting text in between <TodoButton> 
+        it will replace the FALLBACK in the component  
+    The button itself is in the slot, so you can replace this with a quasar button-->
+    <TodoButton @click="createTodo()"> </TodoButton>
   </div>
-  <p>{{ todoState.todo }}</p>
-  <!-- <p>{{ todo }}</p> -->
+  <!-- <p class="err-msg" v-if="todoState.invalid">{{ todoState.errMsg }}</p> -->
+  <!-- v-show is faster as it sets only the class visible state and does not re-render the DOM -->
+  <p class="err-msg" v-show="todoState.invalid">{{ todoState.errMsg }}</p>
 </template>
 
 <style lang="scss" scoped>
@@ -54,6 +40,10 @@ console.log(todoState.todo);
   display: flex;
   transition: 250ms ease;
   border: 2px solid #41b080;
+
+  &.input-err {
+    border-color: red;
+  }
 
   &:focus-within {
     box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1),
@@ -69,10 +59,12 @@ console.log(todoState.todo);
       outline: none;
     }
   }
+}
 
-  button {
-    padding: 8px 16px;
-    border: none;
-  }
+.err-msg {
+  margin-top: 6px;
+  font-size: 12px;
+  text-align: center;
+  color: red;
 }
 </style>
